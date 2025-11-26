@@ -1,58 +1,55 @@
 using System;
-using System.Collections.Generic;
 
 namespace FukaMiya.Utils
 {
-    public sealed class TransitionBuilder
+    public interface ITransitionStarter
     {
-        private  readonly StateMachine StateMachine;
-        private State fromState;
-        private State toState;
+        public ITransitionChain When(Func<bool> condition);
+        public ITransitionChain When(ICondition condition);
+        public Transition Build();
+    }
+
+    public interface ITransitionChain
+    {
+        public ITransitionChain And(Func<bool> condition);
+        public ITransitionChain And(ICondition condition);
+        public ITransitionChain Or(Func<bool> condition);
+        public ITransitionChain Or(ICondition condition);
+        public Transition Build();
+    }
+
+    public sealed class TransitionBuilder : ITransitionStarter, ITransitionChain
+    {
+        private readonly State fromState;
+        private readonly State toState;
         private ICondition condition;
 
-        public TransitionBuilder(StateMachine stateMachine)
+        public TransitionBuilder(State fromState)
         {
-            StateMachine = stateMachine;
+            this.fromState = fromState;
+        }
+        public TransitionBuilder(State fromState, State toState)
+        {
+            this.fromState = fromState;
+            this.toState = toState;
         }
 
-        public TransitionBuilder From<T>() where T : State, new()
-        {
-            fromState = StateMachine.At<T>();
-            return this;
-        }
-        public TransitionBuilder From(State from)
-        {
-            fromState = from;
-            return this;
-        }
-
-        public TransitionBuilder To<T>() where T : State, new()
-        {
-            toState = StateMachine.At<T>();
-            return this;
-        }
-        public TransitionBuilder To(State to)
-        {
-            toState = to;
-            return this;
-        }
-
-        public TransitionBuilder When(Func<bool> condition) => When(new FuncCondition(condition));
-        public TransitionBuilder When(ICondition condition)
+        public ITransitionChain When(Func<bool> condition) => When(new FuncCondition(condition));
+        public ITransitionChain When(ICondition condition)
         {
             this.condition = condition;
             return this;
         }
         
-        public TransitionBuilder And(Func<bool> condition) => And(new FuncCondition(condition));
-        public TransitionBuilder And(ICondition condition)
+        public ITransitionChain And(Func<bool> condition) => And(new FuncCondition(condition));
+        public ITransitionChain And(ICondition condition)
         {
             this.condition = this.condition == null ? condition : new AndCondition(this.condition, condition);
             return this;
         }
 
-        public TransitionBuilder Or(Func<bool> condition) => Or(new FuncCondition(condition));
-        public TransitionBuilder Or(ICondition condition)
+        public ITransitionChain Or(Func<bool> condition) => Or(new FuncCondition(condition));
+        public ITransitionChain Or(ICondition condition)
         {
             this.condition = this.condition == null ? condition : new OrCondition(this.condition, condition);
             return this;
@@ -64,11 +61,6 @@ namespace FukaMiya.Utils
             transition.AddConditions(condition);
             fromState.AddTransition(transition);
             return transition;
-        }
-
-        public static implicit operator Transition(TransitionBuilder builder)
-        {
-            return builder.Build();
         }
     }
 

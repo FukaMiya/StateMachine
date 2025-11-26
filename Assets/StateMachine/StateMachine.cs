@@ -49,11 +49,11 @@ namespace FukaMiya.Utils
         }
     }
 
-    public static class StateMachineExtensions
+    public static class StateExtensions
     {
         public static TransitionBuilder To<T>(this State from) where T : State, new()
         {
-            return new TransitionBuilder(from.StateMachine).From(from).To<T>();
+            return new TransitionBuilder(from, from.StateMachine.At<T>());
         }
     }
 

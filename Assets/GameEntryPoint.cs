@@ -4,6 +4,7 @@ using FukaMiya.Utils;
 public class GameEntryPoint : MonoBehaviour
 {
     private StateMachine stateMachine;
+    private Transform parent;
 
     void Start()
     {
@@ -20,10 +21,16 @@ public class GameEntryPoint : MonoBehaviour
                 () => Input.GetMouseButtonDown(0)))
             .Build();
 
-        inGameState
+        // AnyStateからの遷移
+        stateMachine.AnyState
             .To<SettingState>()
             .When(() => Input.GetKeyDown(KeyCode.Escape))
             .Build();
+
+        // 元いた状態に戻る
+        // settingState.Back()
+        //     .When(() => Input.GetKeyDown(KeyCode.Escape))
+        //     .Build();
 
         // 複雑な条件
         inGameState.To<ResultState>()
@@ -35,10 +42,6 @@ public class GameEntryPoint : MonoBehaviour
                 () => Input.GetKey(KeyCode.Alpha1),
                 () => Input.GetKey(KeyCode.Alpha2),
                 () => Input.GetKeyDown(KeyCode.Alpha3)))
-            .Build();
-
-        settingState.To<InGameState>()
-            .When(() => Input.GetKeyDown(KeyCode.Escape))
             .Build();
 
         inGameState.To<ResultState>()

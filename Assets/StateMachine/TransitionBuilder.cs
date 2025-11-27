@@ -74,13 +74,15 @@ namespace FukaMiya.Utils
 
         public ITransitionChain And(StateCondition condition)
         {
-            this.condition = () => this.condition() && condition();
+            var current = this.condition;
+            this.condition = () => current() && condition();
             return this;
         }
 
         public ITransitionChain Or(StateCondition condition)
         {
-            this.condition = () => this.condition() || condition();
+            var current = this.condition;
+            this.condition = () => current() || condition();
             return this;
         }
 
@@ -91,7 +93,7 @@ namespace FukaMiya.Utils
 
         public Transition Build()
         {
-            var transition = new Transition(fromState, toState);
+            var transition = new Transition(toState);
             transition.SetCondition(condition);
             fromState.AddTransition(transition);
             return transition;
@@ -102,14 +104,12 @@ namespace FukaMiya.Utils
 
     public sealed class Transition : IEquatable<Transition>
     {
-        public State From { get; }
         public State To { get; }
         public float Weight { get; }
         public StateCondition Condition { get; private set; }
 
-        public Transition(State from, State to, float weight = 1f)
+        public Transition(State to, float weight = 1f)
         {
-            From = from;
             To = to;
             Weight = weight;
         }
@@ -122,8 +122,8 @@ namespace FukaMiya.Utils
 
         public bool Equals(Transition other)
         {
-            if (other is null) return false;
-            return From == other.From && To == other.To;
+            if (other == null) return false;
+            return To == other.To && Weight == other.Weight && Condition == other.Condition;
         }
     }
 

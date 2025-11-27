@@ -9,10 +9,27 @@ namespace FukaMiya.Utils
         public State PreviousState { get; private set; }
 
         private readonly Dictionary<Type, State> states = new();
+        public AnyState AnyState { get; }
+
+        public StateMachine()
+        {
+            AnyState = new AnyState();
+            AnyState.Setup(this);
+            states[typeof(AnyState)] = AnyState;
+        }
 
         public void Update()
         {
-            if (CurrentState.CheckTransitionTo(out var nextState))
+            if (AnyState.CheckTransitionTo(out var nextState))
+            {
+                CurrentState.OnExit();
+                PreviousState = CurrentState;
+                CurrentState = nextState;
+                CurrentState.OnEnter();
+                return;
+            }
+
+            if (CurrentState.CheckTransitionTo(out nextState))
             {
                 CurrentState.OnExit();
                 PreviousState = CurrentState;
@@ -102,6 +119,15 @@ namespace FukaMiya.Utils
             transitions.Add(transition);
         }
 
+        public bool IsStateOf<T>() where T : State
+        {
+            return this is T;
+        }
+
         public override string ToString() => GetType().Name;
     }
+
+    public sealed class AnyState : State
+    {
+    }   
 }

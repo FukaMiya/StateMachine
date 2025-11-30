@@ -56,7 +56,7 @@ public class GameEntryPoint : MonoBehaviour
             .When(() => Input.GetKeyDown(KeyCode.Return))
             .Build();
 
-        // stateMachine.SetInitialState<TitleState>();
+        stateMachine.SetInitialState<TitleState>();
     }
 
     void Update()

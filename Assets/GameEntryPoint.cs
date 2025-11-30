@@ -57,6 +57,8 @@ public class GameEntryPoint : MonoBehaviour
             .Build();
 
         stateMachine.SetInitialState<TitleState>();
+
+        Debug.Log(stateMachine.ToMermaidString());
     }
 
     void Update()

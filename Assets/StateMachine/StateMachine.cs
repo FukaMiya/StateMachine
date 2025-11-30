@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace FukaMiya.Utils
 {
@@ -67,6 +68,21 @@ namespace FukaMiya.Utils
             instance.Setup(this);
             return instance;
         }
+
+        public string ToMermaidString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("stateDiagram-v2");
+            foreach (var state in states.Values)
+            {
+                foreach (var t in state.GetTransitions)
+                {
+                    var toState = t.GetToState();
+                    sb.AppendLine($"    {state} --> {(toState == null ? "AnyState" : toState.ToString())}");
+                }
+            }
+            return sb.ToString();
+        }
     }
 
     public static class StateExtensions
@@ -91,6 +107,7 @@ namespace FukaMiya.Utils
         }
 
         private readonly List<Transition> transitions = new();
+        public IReadOnlyList<Transition> GetTransitions => transitions.AsReadOnly();
 
         public virtual void OnEnter() { }
         public virtual void OnExit() { }

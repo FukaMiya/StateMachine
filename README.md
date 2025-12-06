@@ -52,13 +52,18 @@ stateMachine.AnyState.To<JumpState>()
     .When(() => Input.GetKeyDown(KeyCode.Space))
     .Build();
 
+// 死亡時にスコアを渡す(コンテキスト)
+stateMachine.AnyState.To<DieState, int>(() => score)
+    .When(() => hp <= 0)
+    .Build();
+
 // 初期ステートの設定
 stateMachine.SetInitialState<IdleState>();
 
 // ステートマシンを更新
 stateMachine.Update();
 ```
-ステートの遷移は`idle.To<WalkState>()`のように書くことができますが、同様に`idle.To(walk)`のように直接渡すこともできます。
+ステートの遷移は`idle.To<WalkState>()`のように書くことができますが、同様に`idle.To(walk)`のように直接渡すこともできます。コンテクストの受け渡しは任意です。
 
 ### 遷移条件の設定
 `And`, `Or` メソッドや、`Condition` ヘルパーを使って条件を組み合わせることができます。
@@ -89,6 +94,29 @@ settingsState.Back()
     .When(() => Input.GetKeyDown(KeyCode.Escape))
     .Build();
 ```
+
+### コンテキストの受け渡し
+```csharp
+// int型をコンテキストとして受け取るステート
+public class DieState : State<int>
+{
+    public override void OnEnter()
+    {
+        Debug.Log($"スコアは{Context}です！");
+    }
+}
+
+// ダメージを受けた時にスコアを渡す
+stateMachine.AnyState.To<DieState, int>(() => score)
+    .When(() => IsKilled)
+    .Build();
+
+// ダメージを受けた時にコンテキストを渡さない
+stateMachine.AnyState.To<DieState>()
+    .When(() => IsKilledByMySelf)
+    .Build();
+```
+ContextはFunc<TContext>として定義されます。各ステート（State<TContext>）内でContextが参照されるたびに最新のものが取得できます。DieStateのようにコンテキストを受け取るステートであってもコンテキストを渡さないことが可能です。その遷移ではコンテキストはデフォルトの値（参照型の場合null）がContextで得られます。
 
 ### 遷移条件の優先順位
 複数の条件が同じタイミングで満たされた時、

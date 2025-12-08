@@ -5,8 +5,8 @@ namespace FukaMiya.Utils
 {
     public abstract class State
     {
-        public StateMachine StateMachine { get; private set; }
-        public void SetStateMachine(StateMachine stateMachine) => StateMachine = stateMachine;
+        public IStateMachine StateMachine { get; private set; }
+        public void SetStateMachine(IStateMachine stateMachine) => StateMachine = stateMachine;
 
         private readonly List<ITransition> transitions = new();
         public IReadOnlyList<ITransition> GetTransitions => transitions.AsReadOnly();

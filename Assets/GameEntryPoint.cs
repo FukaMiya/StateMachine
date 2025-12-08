@@ -3,14 +3,14 @@ using FukaMiya.Utils;
 
 public class GameEntryPoint : MonoBehaviour
 {
-    private StateMachine stateMachine;
+    private IPullStateMachine stateMachine;
     public int InitialScore = 100;
 
     void Start()
     {
         var factory = new StateFactory();
         factory.Register<InGameState>(() => new InGameState(InitialScore));
-        stateMachine = new StateMachine(factory);
+        stateMachine = StateMachine.Create(factory);
 
         var titleState = stateMachine.At<TitleState>();
         var inGameState = stateMachine.At<InGameState>() as InGameState;

@@ -5,6 +5,7 @@ namespace FukaMiya.Utils
     public interface ITransitionStarter<TContext> : ITransitionParameterSetter<TContext>
     {
         ITransitionChain<TContext> When(StateCondition condition);
+        ITransitionChain<TContext> On(StateCondition condition);
         ITransition Always();
     }
 
@@ -27,7 +28,7 @@ namespace FukaMiya.Utils
         ITransitionFinalizer<TContext> SetName(string name);
     }
 
-    internal sealed class TransitionBuilder<TContext> : ITransitionStarter<TContext>, ITransitionChain<TContext>, ITransitionFinalizer<TContext>
+    internal sealed class TransitionBuilder<TContext> : ITransitionStarter<TContext>, ITransitionChain<TContext>, ITransitionFinalizer<TContext>, IDisposable
     {
         private State fromState;
         private State fixedToState;
@@ -59,6 +60,12 @@ namespace FukaMiya.Utils
         }
 
         public ITransitionChain<TContext> When(StateCondition condition)
+        {
+            this.condition = condition;
+            return this;
+        }
+
+        public ITransitionChain<TContext> On(StateCondition condition)
         {
             this.condition = condition;
             return this;
@@ -120,7 +127,17 @@ namespace FukaMiya.Utils
             transition.SetCondition(condition);
             transition.SetParams(transitionParams);
             fromState.AddTransition(transition);
+            Dispose();
             return transition;
+        }
+
+        public void Dispose()
+        {
+            fromState = null;
+            fixedToState = null;
+            stateProvider = null;
+            condition = null;
+            contextProvider = null;
         }
     }
 

@@ -1,81 +1,42 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FukaMiya.Utils
 {
-    public sealed class StateMachine
+    public interface IStateMachine
     {
-        public State CurrentState { get; private set; }
-        public State PreviousState { get; private set; }
+        State CurrentState { get; }
+        State PreviousState { get; }
+        AnyState AnyState { get; }
+        void SetInitialState<T>() where T : State;
+        State At<T>() where T : State;
+        string ToMermaidString();
+    }
 
-        private readonly StateFactory stateFactory;
-        public AnyState AnyState { get; }
+    public interface IPullStateMachine : IStateMachine
+    {
+        void Update();
+    }
 
-        public StateMachine(StateFactory factory)
+    public interface IPushStateMachine : IStateMachine
+    {
+        void Fire();
+    }
+
+    public interface IPushAndPullStateMachine : IPullStateMachine, IPushStateMachine
+    {
+    }
+
+    public static class StateMachine
+    {
+        public static IPullStateMachine Create(StateFactory factory)
         {
-            stateFactory = factory;
-            AnyState = new AnyState();
-            AnyState.SetStateMachine(this);
+            return new PullStateMachine(factory);
         }
 
-        public void Update()
+        public static IPushAndPullStateMachine Create<TEvent>(StateFactory factory)
         {
-            if (CurrentState == null)
-            {
-                throw new InvalidOperationException("CurrentState is not set. Please set the initial state using SetInitialState<T>() method.");
-            }
-
-            if (AnyState.CheckTransitionTo(out var nextState) ||
-                CurrentState.CheckTransitionTo(out nextState))
-            {
-                ChangeState(nextState);
-                return;
-            }
-
-            CurrentState.Update();
-        }
-
-        public void SetInitialState<T>() where T : State
-        {
-            CurrentState = At<T>();
-            CurrentState.Enter();
-        }
-
-        public State At<T>() where T : State
-        {
-            if (typeof(T) == typeof(AnyState))
-            {
-                return AnyState;
-            }
-
-            var state = stateFactory.CreateState<T>();
-            state.SetStateMachine(this);
-            return state;
-        }
-
-        public string ToMermaidString()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("stateDiagram-v2");
-            foreach (var state in stateFactory.CachedStates)
-            {
-                foreach (var t in state.GetTransitions)
-                {
-                    var toState = t.GetToState();
-                    var transitionName = string.IsNullOrEmpty(t.Name) ? (toState == null ? "AnyState" : toState.ToString()) : t.Name;
-                    sb.AppendLine($"    {state} --> {transitionName}");
-                }
-            }
-            return sb.ToString();
-        }
-
-        void ChangeState(State nextState)
-        {
-            CurrentState.Exit();
-            PreviousState = CurrentState;
-            CurrentState = nextState;
-            CurrentState.Enter();
+            return new PushAndPullStateMachine(factory);
         }
     }
 

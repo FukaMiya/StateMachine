@@ -5,7 +5,8 @@ namespace FukaMiya.Utils
     public interface ITransitionStarter<TContext> : ITransitionParameterSetter<TContext>
     {
         ITransitionChain<TContext> When(StateCondition condition);
-        ITransitionChain<TContext> On(StateCondition condition);
+        ITransitionChain<TContext> On(int eventId);
+        ITransitionChain<TContext> On(string eventId);
         ITransition Always();
     }
 
@@ -34,6 +35,7 @@ namespace FukaMiya.Utils
         private State fixedToState;
         private Func<State> stateProvider;
         private StateCondition condition;
+        private int eventId = -1;
         private readonly TransitionParams transitionParams = new();
         private Func<TContext> contextProvider;
 
@@ -65,9 +67,17 @@ namespace FukaMiya.Utils
             return this;
         }
 
-        public ITransitionChain<TContext> On(StateCondition condition)
+        public ITransitionChain<TContext> On(int eventId)
         {
-            this.condition = condition;
+            this.condition = null;
+            this.eventId = eventId;
+            return this;
+        }
+
+        public ITransitionChain<TContext> On(string eventId)
+        {
+            this.condition = null;
+            this.eventId = eventId.GetHashCode();
             return this;
         }
 
@@ -118,11 +128,11 @@ namespace FukaMiya.Utils
             Transition<TContext> transition;
             if (fixedToState != null)
             {
-                transition = new Transition<TContext>(fixedToState, contextProvider);
+                transition = new Transition<TContext>(fixedToState, contextProvider, eventId);
             }
             else
             {
-                transition = new Transition<TContext>(stateProvider, contextProvider);
+                transition = new Transition<TContext>(stateProvider, contextProvider, eventId);
             }
             transition.SetCondition(condition);
             transition.SetParams(transitionParams);

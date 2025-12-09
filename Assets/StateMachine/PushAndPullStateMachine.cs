@@ -3,74 +3,30 @@ using System.Text;
 
 namespace FukaMiya.Utils
 {
-    public sealed class PushAndPullStateMachine : IPushAndPullStateMachine
+    internal sealed class PushAndPullStateMachine<TEvent> : PullStateMachine, IPushAndPullStateMachine<TEvent>
     {
-        public State CurrentState { get; private set; }
-        public State PreviousState { get; private set; }
-        public AnyState AnyState { get; }
         private readonly StateFactory stateFactory;
 
-        public PushAndPullStateMachine(StateFactory factory)
+        public PushAndPullStateMachine(StateFactory factory) : base(factory)
         {
             stateFactory = factory;
             AnyState = new AnyState();
             AnyState.SetStateMachine(this);
         }
 
-        public void Update()
+        public void Fire(int eventId)
         {
-            if (CurrentState == null)
-            {
-                throw new InvalidOperationException("CurrentState is not set. Please set the initial state using SetInitialState<T>() method.");
-            }
-
-            if (AnyState.CheckTransitionTo(out var nextState) ||
-                CurrentState.CheckTransitionTo(out nextState))
+            if (AnyState.CheckTransitionTo(eventId, out var nextState) ||
+                CurrentState.CheckTransitionTo(eventId, out nextState))
             {
                 ChangeState(nextState);
                 return;
             }
-
-            CurrentState.Update();
         }
 
-        public void Fire()
+        public void Fire(string eventId)
         {
-            
-        }
-
-        public void SetInitialState<T>() where T : State
-        {
-            CurrentState = At<T>();
-            CurrentState.Enter();
-        }
-
-        public State At<T>() where T : State
-        {
-            if (typeof(T) == typeof(AnyState))
-            {
-                return AnyState;
-            }
-
-            var state = stateFactory.CreateState<T>();
-            state.SetStateMachine(this);
-            return state;
-        }
-
-        public string ToMermaidString()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("stateDiagram-v2");
-            foreach (var state in stateFactory.CachedStates)
-            {
-                foreach (var t in state.GetTransitions)
-                {
-                    var toState = t.GetToState();
-                    var transitionName = string.IsNullOrEmpty(t.Name) ? (toState == null ? "AnyState" : toState.ToString()) : t.Name;
-                    sb.AppendLine($"    {state} --> {transitionName}");
-                }
-            }
-            return sb.ToString();
+            Fire(eventId.GetHashCode());
         }
 
         void ChangeState(State nextState)

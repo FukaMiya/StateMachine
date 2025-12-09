@@ -63,6 +63,39 @@ namespace FukaMiya.Utils
             return false;
         }
 
+        public bool CheckTransitionTo(int eventId, out State nextState)
+        {
+            State maxWeightToState = null;
+            ITransition maxWeightTransition = null;
+            float maxWeight = float.MinValue;
+            foreach (var transition in transitions)
+            {
+                if (transition.EventId == eventId && (transition.Condition == null || transition.Condition()))
+                {
+                    var toState = transition.GetToState();
+                    if (toState == null) continue;
+                    if (!transition.IsReentryAllowed && StateMachine.CurrentState.IsStateOf(toState.GetType())) continue;
+
+                    if (maxWeightToState == null || transition.Weight > maxWeight)
+                    {
+                        maxWeightToState = toState;
+                        maxWeightTransition = transition;
+                        maxWeight = transition.Weight;
+                    }
+                }
+            }
+
+            if (maxWeightToState != null)
+            {
+                nextState = maxWeightToState;
+                maxWeightTransition.OnTransition(nextState);
+                return true;
+            }
+
+            nextState = null;
+            return false;
+        }
+
         public void AddTransition(ITransition transition)
         {
             if (transitions.Contains(transition))

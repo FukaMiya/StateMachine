@@ -12,14 +12,15 @@ namespace FukaMiya.Utils
 
     public interface ITransition
     {
-        public StateCondition Condition { get; }
+        StateCondition Condition { get; }
+        int EventId { get; }
 
-        public string Name { get; }
+        string Name { get; }
         float Weight { get; }
         bool IsReentryAllowed { get; }
         
-        public State GetToState();
-        public void OnTransition(State state);
+        State GetToState();
+        void OnTransition(State state);
     }
 
     internal sealed class Transition<TContext> : ITransition
@@ -27,6 +28,7 @@ namespace FukaMiya.Utils
         private readonly State to;
         private readonly Func<TContext> contextProvider;
         private readonly Func<State> stateProvider;
+        public int EventId { get; private set; } = -1;
         public StateCondition Condition { get; private set; }
         public TransitionParams Params { get; private set; }
 
@@ -34,16 +36,18 @@ namespace FukaMiya.Utils
         public bool IsReentryAllowed => Params.IsReentryAllowed;
         public string Name => Params.Name;
 
-        public Transition(State to, Func<TContext> contextProvider)
+        public Transition(State to, Func<TContext> contextProvider, int eventId = -1)
         {
             this.to = to;
             this.contextProvider = contextProvider;
+            this.EventId = eventId;
         }
 
-        public Transition(Func<State> stateProvider, Func<TContext> contextProvider)
+        public Transition(Func<State> stateProvider, Func<TContext> contextProvider, int eventId = -1)
         {
             this.stateProvider = stateProvider;
             this.contextProvider = contextProvider;
+            this.EventId = eventId;
         }
 
         public void OnTransition(State nextState)

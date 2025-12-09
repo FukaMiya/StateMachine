@@ -3,11 +3,11 @@ using System.Text;
 
 namespace FukaMiya.Utils
 {
-    internal sealed class PullStateMachine : IPullStateMachine
+    internal class PullStateMachine : IPullStateMachine
     {
-        public State CurrentState { get; private set; }
-        public State PreviousState { get; private set; }
-        public AnyState AnyState { get; }
+        public State CurrentState { get; protected set; }
+        public State PreviousState { get; protected set; }
+        public AnyState AnyState { get; protected set; }
         private readonly StateFactory stateFactory;
 
         public PullStateMachine(StateFactory factory)

@@ -18,12 +18,13 @@ namespace FukaMiya.Utils
         void Update();
     }
 
-    public interface IPushStateMachine : IStateMachine
+    public interface IPushStateMachine<TEvent> : IStateMachine
     {
-        void Fire();
+        void Fire(int e);
+        void Fire(string e);
     }
 
-    public interface IPushAndPullStateMachine : IPullStateMachine, IPushStateMachine
+    public interface IPushAndPullStateMachine<TEvent> : IPullStateMachine, IPushStateMachine<TEvent>
     {
     }
 
@@ -34,9 +35,9 @@ namespace FukaMiya.Utils
             return new PullStateMachine(factory);
         }
 
-        public static IPushAndPullStateMachine Create<TEvent>(StateFactory factory)
+        public static IPushAndPullStateMachine<TEvent> Create<TEvent>(StateFactory factory)
         {
-            return new PushAndPullStateMachine(factory);
+            return new PushAndPullStateMachine<TEvent>(factory);
         }
     }
 

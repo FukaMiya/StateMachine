@@ -3,14 +3,14 @@ using FukaMiya.Utils;
 
 public class GameEntryPoint : MonoBehaviour
 {
-    private IPullStateMachine stateMachine;
+    private IPushAndPullStateMachine<string> stateMachine;
     public int InitialScore = 100;
 
     void Start()
     {
         var factory = new StateFactory();
         factory.Register<InGameState>(() => new InGameState(InitialScore));
-        stateMachine = StateMachine.Create(factory);
+        stateMachine = StateMachine.Create<string>(factory);
 
         var titleState = stateMachine.At<TitleState>();
         var inGameState = stateMachine.At<InGameState>() as InGameState;
@@ -22,6 +22,10 @@ public class GameEntryPoint : MonoBehaviour
             .When(Condition.Any(
                 () => Input.GetKeyDown(KeyCode.Return),
                 () => Input.GetMouseButtonDown(0)))
+            .Build();
+
+        titleState.To<SecretState>()
+            .On("SecretEntrance")
             .Build();
 
         // AnyStateからの遷移
@@ -74,6 +78,11 @@ public class GameEntryPoint : MonoBehaviour
 
     void Update()
     {
-        stateMachine.Update();
+        // stateMachine.Update();
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            stateMachine.Fire("SecretEntrance");
+        }
     }
 }

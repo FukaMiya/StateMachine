@@ -8,6 +8,9 @@ namespace FukaMiya.Utils
         State CurrentState { get; }
         State PreviousState { get; }
         AnyState AnyState { get; }
+
+        event Action<State> OnStateChanged;
+
         void SetInitialState<T>() where T : State;
         State At<T>() where T : State;
         string ToMermaidString();
@@ -18,22 +21,22 @@ namespace FukaMiya.Utils
         void Update();
     }
 
-    internal interface EnumTypeHolder
-    {
-        Type EnumType { get; }
-        void SetEnumType(Type enumType);
-    }
-
     public interface IPushStateMachine : IStateMachine
     {
         void Fire(int e);
+    }
+
+    internal interface IEnumTypeHolder
+    {
+        Type EnumType { get; }
+        void SetEnumType(Type enumType);
     }
 
     public static class IPushStateMachineExtensions
     {
         public static void Fire<TEvent>(this IPushStateMachine stateMachine, TEvent eventId) where TEvent : Enum
         {
-            if (stateMachine is EnumTypeHolder enumTypeHolder)
+            if (stateMachine is IEnumTypeHolder enumTypeHolder)
             {
                 if (enumTypeHolder.EnumType != null && enumTypeHolder.EnumType != typeof(TEvent))
                 {

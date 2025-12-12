@@ -2,7 +2,7 @@ using System;
 
 namespace FukaMiya.Utils
 {
-    internal sealed class PushAndPullStateMachine : PullStateMachine, IPushAndPullStateMachine, EnumTypeHolder
+    internal sealed class PushAndPullStateMachine : PullStateMachine, IPushAndPullStateMachine, IEnumTypeHolder
     {
         public PushAndPullStateMachine(StateFactory factory) : base(factory)
         {
@@ -18,14 +18,6 @@ namespace FukaMiya.Utils
                 ChangeState(nextState);
                 return;
             }
-        }
-
-        void ChangeState(State nextState)
-        {
-            CurrentState.Exit();
-            PreviousState = CurrentState;
-            CurrentState = nextState;
-            CurrentState.Enter();
         }
 
         public Type EnumType { get; private set; }

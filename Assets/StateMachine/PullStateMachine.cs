@@ -8,6 +8,8 @@ namespace FukaMiya.Utils
         public State CurrentState { get; protected set; }
         public State PreviousState { get; protected set; }
         public AnyState AnyState { get; protected set; }
+        public event Action<State> OnStateChanged;
+
         private readonly StateFactory stateFactory;
 
         public PullStateMachine(StateFactory factory)
@@ -68,12 +70,13 @@ namespace FukaMiya.Utils
             return sb.ToString();
         }
 
-        void ChangeState(State nextState)
+        protected void ChangeState(State nextState)
         {
             CurrentState.Exit();
             PreviousState = CurrentState;
             CurrentState = nextState;
             CurrentState.Enter();
+            OnStateChanged?.Invoke(CurrentState);
         }
     }
 }

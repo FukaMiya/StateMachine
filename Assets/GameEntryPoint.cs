@@ -11,11 +11,6 @@ public enum GameEvent
     GameOver    // ゲームオーバー（外部からの強制通知など）
 }
 
-enum Test
-{
-    A, B, C
-}
-
 public class GameEntryPoint : MonoBehaviour
 {
     // インターフェースで保持（Pull/Push両方使える型）

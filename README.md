@@ -1,145 +1,24 @@
-### ステートの定義
-各ステートは`State`クラスを継承します。
-```csharp
-using UnityEngine;
-using FukaMiya.Utils;
+## 概要
+Unity向けの軽量かつ柔軟なステートマシンライブラリです。
+「ポーリング（Pull型）」と「イベント駆動（Push型）」をシームレスに統合し、メソッドチェーンによる直感的な記述と、DI（依存性注入）への柔軟な対応を特徴としています。
 
-public class IdleState : State
-{
-    public override void OnEnter()
-    {
-        Debug.Log("Idle開始");
-    }
+## 特徴
+- ハイブリッド駆動: `Update()`による条件監視（Pull）と、`Fire()`によるイベント通知（Push）を1つのステートマシン内で混在可能。アクションゲームの入力応答性と、ゲーム進行の条件管理を両立できます。
 
-    public override void OnUpdate()
-    {
-        // 毎フレーム呼ばれます
-    }
+- Fluent API: `idle.To(jump).On(Event.Jump).When(() => IsGrounded).Build();` のように自然言語に近い形で遷移ロジックを記述可能です。
 
-    public override void OnExit()
-    {
-        Debug.Log("Idle終了");
-    }
-}
+- 型安全なイベント: Enumを使用して型安全にイベントを管理しつつ、内部的にはハッシュ値（int）で高速に処理。UnityのAnimation Event（int/string）との連携も容易です。
 
-public class WalkState : State { }
-public class JumpState : State { }
-```
+- DI・Factory対応: 依存関係を持つステートの生成を制御でき、VContainerなどのDIコンテナや手動DIとスムーズに連携できます。
 
-### ステートマシンのセットアップ
-エントリポイント内でステートマシンを初期化します。
-```csharp
-// ステートマシンを宣言
-StateMachine stateMachine = new StateMachine();
+- Context（データ渡し）: 遷移時に`int`や`class`などのデータをステートに渡すことが可能です。
 
-// 各ステートを取得（自動生成されます）
-var idle = stateMachine.At<IdleState>();
-var walk = stateMachine.At<WalkState>();
-var jump = stateMachine.At<JumpState>();
+- Mermaid可視化: 構築したステートマシンをMermaid記法で出力し、遷移図として可視化可能です。
 
-// シンプルな遷移: 入力があったら Idle -> Walk
-idle.To<WalkState>()
-    .When(() => Input.GetAxis("Horizontal") != 0)
-    .Build();
+## 使い方
+リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
+使用時には`using FukaMiya.Utils;`を追記してください。
+具体的な使い方はGameEntryPoint.csを確認してください。Demo.unityから実行することができます。
 
-// 入力がなくなったら Walk -> Idle
-walk.To<IdleState>()
-    .When(() => Input.GetAxis("Horizontal") == 0)
-    .Build();
-
-// どのステートからでもジャンプ（AnyState）
-stateMachine.AnyState.To<JumpState>()
-    .When(() => Input.GetKeyDown(KeyCode.Space))
-    .Build();
-
-// 死亡時にスコアを渡す(コンテキスト)
-stateMachine.AnyState.To<DieState, int>(() => score)
-    .When(() => hp <= 0)
-    .Build();
-
-// 初期ステートの設定
-stateMachine.SetInitialState<IdleState>();
-
-// ステートマシンを更新
-stateMachine.Update();
-```
-ステートの遷移は`idle.To<WalkState>()`のように書くことができますが、同様に`idle.To(walk)`のように直接渡すこともできます。コンテクストの受け渡しは任意です。
-
-### 遷移条件の設定
-`And`, `Or` メソッドや、`Condition` ヘルパーを使って条件を組み合わせることができます。
-```csharp
-// 「地面にいて」かつ「(移動入力がある OR ブースト中)」なら RunState へ
-idle.To<RunState>()
-    .When(() => IsGrounded)
-    .And(Condition.Any(
-        () => Input.GetButton("Horizontal"),
-        () => IsBoostActive
-    ))
-    .Build();
-```
-
-`AnyState`を用いて任意条件でどのステートからでも遷移することができます。同一ステートへの遷移はデフォルトでは許可されていません。
-```csharp
-// 既にダメージ状態であっても、さらにダメージを受けたら入り直す
-stateMachine.AnyState.To<DamageState>()
-    .When(() => IsDamageReceived)
-    .SetAllowReentry(true) // 再入を許可
-    .Build();
-```
-
-`Back()`を用いることで一つ前のステートに戻ることができます。`AnyState`での遷移から復帰する際に使えるでしょう。
-```csharp
-// Escキーが押されたら、ひとつ前の画面（ステート）に戻る
-settingsState.Back()
-    .When(() => Input.GetKeyDown(KeyCode.Escape))
-    .Build();
-```
-
-### コンテキストの受け渡し
-```csharp
-// int型をコンテキストとして受け取るステート
-public class DieState : State<int>
-{
-    public override void OnEnter()
-    {
-        Debug.Log($"スコアは{Context}です！");
-    }
-}
-
-// ダメージを受けた時にスコアを渡す
-stateMachine.AnyState.To<DieState, int>(() => score)
-    .When(() => IsKilled)
-    .Build();
-
-// ダメージを受けた時にコンテキストを渡さない
-stateMachine.AnyState.To<DieState>()
-    .When(() => IsKilledByMySelf)
-    .Build();
-```
-ContextはFunc<TContext>として定義されます。各ステート（State<TContext>）内でContextが参照されるたびに最新のものが取得できます。DieStateのようにコンテキストを受け取るステートであってもコンテキストを渡さないことが可能です。その遷移ではコンテキストはデフォルトの値（参照型の場合null）がContextで得られます。
-
-### 遷移条件の優先順位
-複数の条件が同じタイミングで満たされた時、
-1. Weightがより高い
-2. 先に登録されている
-
-遷移条件が優先されます。
-```csharp
-// 優先度1: 攻撃ボタンが押されていたらその場で攻撃する
-idle.To<AttackState>()
-	.When(() => Input.GetButton("Attack"))
-	.SetWeight(2.0f) // Weightはデフォルトで1.0f
-	.Build();
-
-// 優先度2: Runボタンが押されていたら走る
-idle.To<RunState>().When(() => Input.GetButton("Run")).Build();
-
-// 優先度3: そうでなくて、移動入力があれば歩く
-idle.To<WalkState>().When(() => Input.GetButton("Horizontal")).Build();
-```
-
-### 状態遷移図の出力
-ステートマシンに登録されている状態遷移一覧をマーメイド記法で出力することができます。
-```csharp
-Debug.Log(stateMachine.ToMermaidString());
-```
+## ライセンス
+[MIT License](LICENSE)

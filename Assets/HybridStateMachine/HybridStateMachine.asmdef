@@ -1,6 +1,6 @@
 {
     "name": "HybridStateMachine",
-    "rootNamespace": "",
+    "rootNamespace": "HybridStateMachine",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

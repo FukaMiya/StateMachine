@@ -12,10 +12,10 @@ HybridStateMachineはUnity向けの軽量かつ柔軟なステートマシンラ
 - Mermaid可視化: 構築したステートマシンをMermaid記法で出力し、遷移図として可視化可能です。
 
 ## 使い方
-リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
-使用時には`using HybridStateMachine;`を追記してください。
-具体的な使い方は[GameEntryPoint.cs](Assets/GameEntryPoint.cs)を確認してください。Demo.unityから実行することができます。
-このライブラリについての記事を書きました。[【Unity/C#】HybridでFluentなステートマシンを作った](https://zenn.dev/holybloodfilled/articles/28addda1f62b9b)
+- リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
+- 使用時には`using HybridStateMachine;`を追記してください。
+- 具体的な使い方は[GameEntryPoint.cs](Assets/GameEntryPoint.cs)を確認してください。Demo.unityから実行することができます。
+- このライブラリについての記事を書きました。[【Unity/C#】HybridでFluentなステートマシンを作った](https://zenn.dev/holybloodfilled/articles/28addda1f62b9b)
 
 ## ライセンス
 [MIT License](LICENSE)

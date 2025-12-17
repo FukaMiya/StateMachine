@@ -12,7 +12,7 @@ public enum GameEvent
 
 public class GameEntryPoint : MonoBehaviour
 {
-    // インターフェースで保持（Pull/Push両方使える型）
+    // Pull/Push両方使える型
     private IPushAndPullStateMachine stateMachine;
 
     // デモ用のパラメータ

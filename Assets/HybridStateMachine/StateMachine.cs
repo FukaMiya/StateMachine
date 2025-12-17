@@ -167,6 +167,13 @@ namespace HybridStateMachine
         private readonly Dictionary<Type, State> stateCache = new();
 
         /// <summary>
+        /// Creates a new instance of the StateFactory.
+        /// </summary>
+        public StateFactory()
+        {
+        }
+
+        /// <summary>
         /// Gets the cached states.
         /// </summary>
         public IEnumerable<State> CachedStates => stateCache.Values;

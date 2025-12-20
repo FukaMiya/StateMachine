@@ -101,7 +101,7 @@ namespace HybridStateMachine
         }
 
         internal void SetStateMachine(IStateMachine stateMachine) => this.stateMachine = stateMachine;
-        internal IStateMachine GetStateMachine() => stateMachine;
+        public IStateMachine GetStateMachine() => stateMachine;
         internal IReadOnlyList<ITransition> GetTransitions() => transitions.AsReadOnly();
 
         internal void AddTransition(ITransition transition)

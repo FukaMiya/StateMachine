@@ -1,21 +1,21 @@
-## 概要
-HybridStateMachineはUnity向けの軽量かつ柔軟なステートマシンライブラリです。
-「イベント駆動（Push型）」と「条件監視（Pull型）」をシームレスに統合し、メソッドチェーンによる直感的な記述と、DIへの柔軟な対応を特徴としています。
+## Overview
+[English](README.md)
+HybridStateMachine is a lightweight and flexible state machine library for Unity.
+It seamlessly integrates "event-driven (push-based)" and "condition monitoring (pull-based)" and features intuitive description through method chaining and flexible support for DI.
 
-## 特徴
-- ハイブリッド駆動: `Update()`による条件監視（Pull）と、`Fire()`によるイベント通知（Push）を1つのステートマシン内で混在可能。イベントはEnumを使用して型安全に管理できます。
+## Features
+- Hybrid Driven: Allows mixing condition monitoring (Pull) via `Update()` and event notification (Push) via `Fire()` within a single state machine. Events can be managed in a type-safe manner using Enums.
 
-- Fluent Interface: `idle.To(jump).On(Event.Jump).When(() => IsGrounded).Build();` のように自然言語に近い形で遷移ロジックを記述できます。
+- Fluent Interface: Transition logic can be described in a way close to natural language, such as `idle.To(jump).On(Event.Jump).When(() => IsGrounded).Build();`.
 
-- DI・Factory対応: 依存関係を持つステートの生成を制御でき、VContainerなどのDIコンテナや手動DIとスムーズに連携できます。
+- DI/Factory Support: Allows control over the generation of states with dependencies, enabling smooth integration with DI containers like VContainer or manual DI.
 
-- Mermaid可視化: 構築したステートマシンをMermaid記法で出力し、遷移図として可視化可能です。
+- Mermaid Visualization: Built state machines can be output in Mermaid notation for visualization as transition diagrams.
 
-## 使い方
-- リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
-- 使用時には`using HybridStateMachine;`を追記してください。
-- 具体的な使い方は[GameEntryPoint.cs](Assets/GameEntryPoint.cs)を確認してください。Demo.unityから実行することができます。
-- このライブラリについての記事を書きました。[【Unity/C#】HybridでFluentなステートマシンを作った](https://zenn.dev/holybloodfilled/articles/28addda1f62b9b)
+## Usage
+- Place the `Assets/StateMachine` folder from the repository into any location in your Unity project.
+- Add `using HybridStateMachine;` when using it.
+- For specific usage, please check [GameEntryPoint.cs](Assets/GameEntryPoint.cs). You can run it from Demo.unity.
 
-## ライセンス
+## License
 [MIT License](LICENSE)

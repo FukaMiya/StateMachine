@@ -1,5 +1,5 @@
+[README in English](README.md)
 ## 概要
-[日本語](README_JA.md)
 HybridStateMachineはUnity向けの軽量かつ柔軟なステートマシンライブラリです。
 「イベント駆動（Push型）」と「条件監視（Pull型）」をシームレスに統合し、メソッドチェーンによる直感的な記述と、DIへの柔軟な対応を特徴としています。
 

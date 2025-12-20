@@ -1,5 +1,5 @@
+[日本語版 README](README_JA.md)
 ## Overview
-[English](README.md)
 HybridStateMachine is a lightweight and flexible state machine library for Unity.
 It seamlessly integrates "event-driven (push-based)" and "condition monitoring (pull-based)" and features intuitive description through method chaining and flexible support for DI.
 
